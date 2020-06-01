@@ -1,1 +1,98 @@
-Placeholder
+library(Biostrings)
+library("BSgenome")
+ag = available.genomes()
+length(ag)
+library("BSgenome.Ecoli.NCBI.20080805")
+Ecoli
+shineDalgarno = "AGGAGGT"
+ecoli = Ecoli$NC_010473
+​
+window = 50000
+starts = seq(1, length(ecoli) - window, by = window)
+ends   = starts + window - 1
+numMatches = vapply(seq_along(starts), function(i) {
+    countPattern(shineDalgarno, ecoli[starts[i]:ends[i]],
+                 max.mismatch = 0)
+}, numeric(1))
+table(numMatches)
+library("vcd")
+gf = goodfit(numMatches, "poisson")
+summary(gf)
+​
+distplot(numMatches, type = "poisson")
+​
+sdMatches = matchPattern(shineDalgarno, ecoli, max.mismatch = 0)
+betweenmotifs = gaps(sdMatches)
+​
+library("Renext")
+expplot(width(betweenmotifs), rate = 1/mean(width(betweenmotifs)),
+        labels = "fit")
+​
+# exericise 2.1
+xx = rbinom(1000,1,1e-3)
+table(xx)
+​
+maxes = replicate(1000000, {
+    max(rpois(100, 0.5))
+})
+table(maxes)
+prb <- mean( maxes >= 9 )
+​
+function(n){max(runif(n,min = 0,max = 7)}
+​
+maxima <- replicate(100,max(runif(25,min = 0,max = 7)))
+plot(density(maxima))        
+hist(maxima)
+# maximum likelihood estimate?
+max(maxima)
+​
+# exercise 
+mtb = read.table(".../data/M_tuberculosis.txt", header = TRUE)
+head(mtb, n = 4)
+pro  =  mtb[ mtb$AmAcid == "Pro", "Number"]
+pro/sum(pro)
+​
+table(mtb$AmAcid)
+table(mtb$Codon)
+​
+# each length/colsum(Number)
+​
+staph = readDNAStringSet(".../data/staphsequence.ffn.txt", "fasta")
+staph[[1]]
+s1 = alphabetFrequency(staph, baseOnly = TRUE, collapse = TRUE)[1:4]
+s1/sum(s1)
+​
+​
+​
+rtheta = rbeta(100000, 50, 350)
+runifz = runif(100000)
+runifx = runif(100000,0.5,0.5)
+y = vapply(rtheta, function(th) {
+    rbinom(1, prob = th, size = 300)
+}, numeric(1))
+y1 = vapply(runifz, function(th) {
+    rbinom(1, prob = th, size = 300)
+}, numeric(1))
+y2 = vapply(runifx, function(th) {
+    rbinom(1, prob = th, size = 300)
+}, numeric(1))
+hist(y, breaks = 50, col = "orange", main = "", xlab = "")
+hist(y1, breaks=50, col= "green", main= "", add=TRUE)
+hist(y2, breaks=50, col= "red", main= "", add=TRUE)
+​
+thetas = seq(0, 1, by = 0.001)
+theta = thetas[1:500]
+dfbetas = data.frame(theta,
+                     db1= dbeta(theta,10,30),
+                     db2 = dbeta(theta, 20, 60),
+                     db3 = dbeta(theta, 50, 150),
+                     db4 = dbeta(theta,1,1),
+                     db5 = dbeta(theta,0.5,0.5))
+require(reshape2)
+datalong  =  melt(dfbetas, id="theta")
+ggplot(datalong) +
+    geom_line(aes(x = theta,y=value,colour=variable)) +
+    theme(legend.title=element_blank()) +
+    geom_vline(aes(xintercept=0.25), colour="#990000", linetype="dashed")+
+    scale_colour_discrete(name  ="Prior",
+                          labels=c("B(10,30)", 
